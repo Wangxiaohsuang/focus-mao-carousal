@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            list-style: none;
+
+        }
+
+        ul {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 2500px;
+        }
+
+        ul li {
+            position: absolute;
+            left: 500px;
+        }
+
+        ul li:first-child {
+            left: 0;
+        }
+
+        ol {
+            position: absolute;
+            right: 40px;
+            bottom: 20px;
+        }
+
+        ol li {
+            width: 20px;
+            height: 20px;
+            line-height: 20px;
+            text-align: center;
+            margin-right: 10px;
+            border: 1px solid orange;
+            background-color: white;
+            cursor: pointer;
+            float: left;
+
+        }
+
+        img {
+            vertical-align: top;
+        }
+
+        .box {
+            margin: 100px auto;
+            width: 500px;
+            height: 200px;
+            border: 1px solid black;
+            position: relative;
+            overflow: hidden;
+        }
+
+
+    </style>
+    <script src='../jquery-3.2.1.min.js'></script>
+    <script>
+
+        /*简直了,和js思路一毛一样,为什么有bug*/
+        /* $(function() {
+         $('ul li').each(function (index,element) {
+         $('<li>'+(index+1)+'</li>').appendTo($('ol'));
+         });
+         var iNow = 0;
+         var oneWidth = $('ul li').first().width();
+         $('ol li').click(function () {
+         $(this).css('backgroundColor','orange').siblings().css('backgroundColor','white');
+         var index = $(this).index();
+         if(iNow<index) { //当前图片索引小于按钮时,从右往左运动
+         $(this).css('left',oneWidth+'px');//让点击的按钮对应的图片定位到盒子右边
+         $('ul li:eq('+iNow+')').stop().animate({'left':-oneWidth+'px'});//当前图片运动到盒子左边
+         }
+         else if (iNow>index) {//当前图片索引大于按钮的时候，从左往右运动
+         $(this).css('left',-oneWidth+'px');//让点击的按钮对应的图片定位到盒子左边
+         $('ul li:eq('+iNow+')').stop().animate({'left':oneWidth+'px'});//当前图片运动到盒子右边
+         }
+         $('ul li:eq('+index+')').stop().animate({'left':0});
+         iNow = index;
+         });
+
+         });*/
+
+    </script>
+    <script>
+        window.onload = function () {
+            var ul = document.getElementsByTagName('ul')[0];
+            var ol = document.getElementsByTagName('ol')[0];
+            var ulists = ul.getElementsByTagName('li');
+            var width = ulists[0].offsetWidth;
+            for (var i = 0; i < ulists.length; i++) {
+                var li = document.createElement('li');
+                li.innerHTML = i + 1;
+                ol.appendChild(li);
+            }
+
+            var olists = ol.getElementsByTagName('li');
+            olists[0].style.backgroundColor = 'orange';
+            var now = 0;
+            var flag = true;
+
+                for (var i = 0; i < olists.length; i++) {
+                    olists[i].index = i;
+                    olists[i].onmouseover = function () {
+                        if(flag) {
+                            flag = false;
+                            for (var j = 0; j < olists.length; j++) {
+                                olists[j].style.backgroundColor = 'white';
+                            }
+                            this.style.backgroundColor = 'orange';
+                            var index = this.index;
+                            if(index>now) {
+                                ulists[index].style.left = width+'px';
+                                bufferMove(ulists[now],{'left':-width});
+                            }else if (index<now) {
+                                ulists[index].style.left = -width+'px';
+                                bufferMove(ulists[now],{'left':width});
+                            }
+                            bufferMove(ulists[index],{'left':0},function () {
+                                flag = true;
+                            });
+                            now = index;
+                    }
+                };
+            }
+
+
+
+
+        };
+
+        //返回值是字符串
+        function getStyle(obj, attr) {
+            if (window.getComputedStyle) {
+                return window.getComputedStyle(obj, null)[attr];
+            }
+            else {
+                return obj.currentStyle[attr];
+            }
+        }
+        function bufferMove(obj, json, fn) {
+            clearInterval(obj.timer);
+            obj.timer = setInterval(function () {
+                var flag = true;//假设
+                for (var attr in json) {
+                    if (attr == 'opacity') {
+                        var leader = getStyle(obj, attr) * 100;//offsetLeft就近取整
+                        var target = json[attr] * 100;
+                        var step = (target - leader) / 8;
+                        step = step > 0 ? Math.ceil(step) : Math.floor(step);
+                        leader += step;
+                        obj.style[attr] = leader / 100;
+                    }
+                    else if (attr == 'zIndex') {
+                        obj.style.zIndex = json[attr];
+                    }
+                    else {
+                        var leader = parseInt(getStyle(obj, attr)) || 0;//offsetLeft就近取整
+                        var target = json[attr];
+                        var step = (target - leader) / 8;
+                        step = step > 0 ? Math.ceil(step) : Math.floor(step);
+                        leader += step;
+                        obj.style[attr] = leader + 'px';
+                    }
+                    if (leader !== target) {
+                        flag = false;
+                    }
+                }
+                if (flag) {
+                    clearInterval(obj.timer);
+                    if (fn) {
+                        fn();
+                    }
+                }
+            }, 15);
+        }
+    </script>
+</head>
+<body>
+<div class="box">
+    <ul>
+        <li><img src="images/1.jpg" alt=""></li>
+        <li><img src="images/2.jpg" alt=""></li>
+        <li><img src="images/3.jpg" alt=""></li>
+        <li><img src="images/4.jpg" alt=""></li>
+        <li><img src="images/5.jpg" alt=""></li>
+    </ul>
+    <ol></ol>
+</div>
+</body>
+</html>

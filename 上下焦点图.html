@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        *{
+            padding: 0;
+            margin: 0;
+        }
+        li {
+            list-style: none;
+            float: left;
+        }
+        ul {
+            position: absolute;
+            top:0;
+            left:0;
+        }
+        ol {
+            position: absolute;
+            right:40px;
+            bottom:20px;
+        }
+        ol li {
+            width: 20px;
+            height: 20px;
+            line-height: 20px;
+            text-align:center ;
+            margin-right:10px;
+            border:1px solid orange;
+            background-color:white;
+            cursor:pointer;
+        }
+        img {
+            vertical-align: top;
+        }
+        .box {
+            margin: 100px auto;
+            width: 500px;
+            height: 200px;
+            border: 1px solid black;
+            position: relative;
+            overflow: hidden;
+        }
+
+
+
+    </style>
+    <script src='../jquery-3.2.1.min.js'></script>
+    <script>
+        $(function() {
+            var len = $('ul>li').length;
+            var oneHeight = $('ul>li>img').height();
+            $('ul li').each(function (index) {
+                $('<li>'+(index+1)+'</li>').appendTo('ol');
+            });
+            $('ol li').first().css('backgroundColor','orange');
+            $('ul>li').first().clone(true).appendTo($('ul'));
+            $('ol li').click(function () {
+                $(this).css('backgroundColor','orange').siblings().css('backgroundColor','white');
+                var index = $(this).index();
+                var target = - oneHeight*index;
+                pic = index;
+                buttons = index;
+                $('ul').stop().animate({'top':target});
+            });
+            var pic = 0;
+            var buttons = 0;
+            $('.box').mouseover(function () {
+                clearInterval(timer);
+            });
+            $('.box').mouseout(function () {
+                timer = setInterval(run,1000);
+            });
+                timer = setInterval(run,1000);
+            function run () {
+                if(pic== $('ul>li').length-1) {
+                    pic=0;
+                    $('ul').css('top',0);
+                }
+                pic++;
+                if(buttons==$('ol>li').length-1) {
+                    buttons=0;
+                }
+                else {
+                    buttons++;
+                }
+                $('ol>li:eq('+buttons+')').css('backgroundColor','orange').siblings().css('backgroundColor','white');
+                var target = - oneHeight*pic;
+                $('ul').stop().animate({'top':target});
+
+            }
+
+
+        })
+
+    </script>
+</head>
+<body>
+<div class="box">
+    <ul>
+        <li><img src="images/1.jpg" alt=""></li>
+        <li><img src="images/2.jpg" alt=""></li>
+        <li><img src="images/3.jpg" alt=""></li>
+        <li><img src="images/4.jpg" alt=""></li>
+        <li><img src="images/5.jpg" alt=""></li>
+    </ul>
+    <ol></ol>
+</div>
+</body>
+</html>

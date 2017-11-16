@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            list-style: none;
+
+        }
+
+        ul {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 2500px;
+        }
+
+        ul li {
+            position: absolute;
+            left: 500px;
+        }
+
+        ul li:first-child {
+            left: 0;
+        }
+
+        ol {
+            position: absolute;
+            right: 40px;
+            bottom: 20px;
+        }
+
+        ol li {
+            width: 20px;
+            height: 20px;
+            line-height: 20px;
+            text-align: center;
+            margin-right: 10px;
+            border: 1px solid orange;
+            background-color: white;
+            cursor: pointer;
+            float: left;
+
+        }
+
+        img {
+            vertical-align: top;
+        }
+
+        .box {
+            margin: 100px auto;
+            width: 500px;
+            height: 200px;
+            border: 1px solid black;
+            position: relative;
+            overflow: hidden;
+        }
+
+
+    </style>
+    <script src='../jquery-3.2.1.min.js'></script>
+    <script>
+        window.onload = function () {
+            var box = document.getElementsByClassName('box')[0];
+            var ul = document.getElementsByTagName('ul')[0];
+            var ol = document.getElementsByTagName('ol')[0];
+            var ulists = ul.getElementsByTagName('li');
+            var width = ulists[0].offsetWidth;
+            for (var i = 0; i < ulists.length; i++) {
+                var li = document.createElement('li');
+                li.innerHTML = i + 1;
+                ol.appendChild(li);
+            }
+
+            var olists = ol.getElementsByTagName('li');
+            olists[0].style.backgroundColor = 'orange';
+            var now = 0;
+            var flag = true;
+            //按钮控制的功能
+                for (var i = 0; i < olists.length; i++) {
+                    olists[i].index = i;
+                    olists[i].onmouseover = function () {
+                        if(flag) {
+                            flag = false;
+                            for (var j = 0; j < olists.length; j++) {
+                                olists[j].style.backgroundColor = 'white';
+                            }
+                            this.style.backgroundColor = 'orange';
+                            var index = this.index;
+                            if(index>now) {
+                                ulists[index].style.left = width+'px';
+                                bufferMove(ulists[now],{'left':-width});
+                            }else if (index<now) {
+                                ulists[index].style.left = -width+'px';
+                                bufferMove(ulists[now],{'left':width});
+                            }
+                            bufferMove(ulists[index],{'left':0,'opacity':0.5},function () {
+                                flag = true;
+                                bufferMove(ulists[index],{'opacity':1});
+                            });
+                            now = index;
+                         }
+                };
+            }
+            //自动播放的功能
+            var iNow = 0;
+            var index= 0;
+            play();
+            var timer = null;
+            box.onmouseover = function () {
+                clearInterval(timer)
+            };
+            box.onmouseout = function () {
+                timer = setInterval(play,1000);
+            };
+            function play() {
+                setInterval(function () {
+                    if(iNow==ulists.length-1) {
+                        iNow=0;
+                    }
+                    index=iNow+1;
+                    console.log(index);
+                    ulists[index].style.left = width+'px';
+                    bufferMove(ulists[iNow],{'left':-width});
+                    bufferMove(ulists[index],{'left':0,'opacity':0.5},function () {
+
+                    });
+
+                    iNow++;
+                },15);
+
+            }
+
+
+
+
+
+        };
+
+        //返回值是字符串
+        function getStyle(obj, attr) {
+            if (window.getComputedStyle) {
+                return window.getComputedStyle(obj, null)[attr];
+            }
+            else {
+                return obj.currentStyle[attr];
+            }
+        }
+        function bufferMove(obj, json, fn) {
+            clearInterval(obj.timer);
+            obj.timer = setInterval(function () {
+                var flag = true;//假设
+                for (var attr in json) {
+                    if (attr == 'opacity') {
+                        var leader = getStyle(obj, attr) * 100;//offsetLeft就近取整
+                        var target = json[attr] * 100;
+                        var step = (target - leader) / 8;
+                        step = step > 0 ? Math.ceil(step) : Math.floor(step);
+                        leader += step;
+                        obj.style[attr] = leader / 100;
+                    }
+                    else if (attr == 'zIndex') {
+                        obj.style.zIndex = json[attr];
+                    }
+                    else {
+                        var leader = parseInt(getStyle(obj, attr)) || 0;//offsetLeft就近取整
+                        var target = json[attr];
+                        var step = (target - leader) / 8;
+                        step = step > 0 ? Math.ceil(step) : Math.floor(step);
+                        leader += step;
+                        obj.style[attr] = leader + 'px';
+                    }
+                    if (leader !== target) {
+                        flag = false;
+                    }
+                }
+                if (flag) {
+                    clearInterval(obj.timer);
+                    if (fn) {
+                        fn();
+                    }
+                }
+            }, 15);
+        }
+    </script>
+</head>
+<body>
+<div class="box">
+    <ul>
+        <li><img src="images/1.jpg" alt=""></li>
+        <li><img src="images/2.jpg" alt=""></li>
+        <li><img src="images/3.jpg" alt=""></li>
+        <li><img src="images/4.jpg" alt=""></li>
+        <li><img src="images/5.jpg" alt=""></li>
+    </ul>
+    <ol></ol>
+</div>
+</body>
+</html>

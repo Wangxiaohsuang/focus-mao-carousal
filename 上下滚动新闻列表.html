@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        ul {
+            list-style:none;
+        }
+        .box {
+            width: 400px;
+            height: 40px;
+            margin:100px auto;
+            border:1px solid black;
+            position:relative;
+            overflow:hidden;
+        }
+        ul {
+            width: 400px;
+            position:absolute;
+        }
+        li {
+            height: 40px;
+            padding-left:20px;
+            line-height: 40px;
+        }
+    </style>
+    <script>
+        window.onload = function () {
+            var box = document.getElementById('box');
+            var ul = box.children[0];
+            var lis = ul.children;
+            ul.appendChild(lis[0].cloneNode(true));
+            var height = lis[0].offsetHeight;
+            ul.style.height = lis.length*height + 'px';
+            var count=0;
+            var timer = null;
+            box.onmouseover = function () {
+                clearInterval(timer);
+            };
+            box.onmouseout = function () {
+                timer = setInterval(play,2000);
+            };
+            timer = setInterval(play,2000);
+            function play() {
+                if(count==lis.length-1) {
+                    ul.style.top = 0;
+                    count=0;
+                }
+                count++;
+                animate(ul,{'top':-height*count});
+            }
+
+        };
+
+
+        function getStyle(obj, attr) {
+            if (window.getComputedStyle) {
+                return window.getComputedStyle(obj, null)[attr];
+            }
+            else {
+                return obj.currentStyle[attr];
+            }
+        }
+        function animate(obj, json, fn) {
+            clearInterval(obj.timer);
+            obj.timer = setInterval(function () {
+                var flag = true;//假设
+                for (var attr in json) {
+                    if (attr == 'opacity') {
+                        var leader = getStyle(obj, attr) * 100;//offsetLeft就近取整
+                        var target = json[attr] * 100;
+                        var step = (target - leader) / 10;
+                        step = step > 0 ? Math.ceil(step) : Math.floor(step);
+                        leader += step;
+                        obj.style[attr] = leader / 100;
+                    }
+                    else if (attr == 'zIndex') {
+                        obj.style.zIndex = json[attr];
+                    }
+                    else {
+                        var leader = parseInt(getStyle(obj, attr)) || 0;//offsetLeft就近取整
+                        var target = json[attr];
+                        var step = (target - leader) / 10;
+                        step = step > 0 ? Math.ceil(step) : Math.floor(step);
+                        leader += step;
+                        obj.style[attr] = leader + 'px';
+                    }
+                    if (leader !== target) {
+                        flag = false;
+                    }
+                }
+                if (flag) {
+                    clearInterval(obj.timer);
+                    if (fn) {
+                        fn();
+                    }
+                }
+            }, 30);
+        }
+
+
+    </script>
+</head>
+<body>
+<div class="box" id='box'>
+    <ul>
+        <li>习近平主席最近召开第几次大会</li>
+        <li>韩国萨德系统已经开始全面部署,中韩关系紧张</li>
+        <li>日本声称钓鱼岛属于日本国土</li>
+        <li>美国大选完成,希拉里终落选</li>
+        <li>恐怖组织声称必将毁灭美国</li>
+    </ul>
+</div>
+
+
+</body>
+</html>
